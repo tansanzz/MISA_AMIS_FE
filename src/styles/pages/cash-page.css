@@ -1,0 +1,124 @@
+.the-navbar {
+  top: 0;
+  position: sticky;
+  width: 100%;
+  background: var(--d-title);
+  z-index: 2;
+}
+
+.the-navbar .navbar {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  justify-content: space-between;
+}
+
+.the-navbar .navbar .navbar-left,
+.the-navbar .navbar .navbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.the-navbar .navbar .navbar-right {
+  margin-right: 16px;
+}
+
+.header-branch {
+  display: flex;
+}
+
+.header-branch a {
+  display: flex;
+  align-items: center;
+}
+
+.header-branch-name {
+  padding-left: 10px;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 600px;
+  text-overflow: ellipsis;
+  transition: all 0.2s ease;
+  color: var(--l-title);
+}
+
+.account-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.user-name {
+  align-items: center;
+  color: var(--l-title);
+  display: flex;
+  margin-right: 8px;
+}
+
+.notify {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.router-content {
+  background-color: #EDEEF0;
+  padding: 0 24px;
+  position: absolute;
+  top: 56px;
+  height: calc(100vh - 56px);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.header-list {
+  padding: 24px 0;
+  transition: top 0.25s;
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+  background-color:#EEEFF0;
+}
+
+.title-di {
+  color: var(--l-title);
+}
+
+.grid-list-data {
+  background: var(--d-title);
+  padding: 16px 16px;
+  position: relative;
+  z-index: 2;
+}
+
+.grid-button-list {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.grid-button-list--right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.grid-button-list--right .button-wrapper {
+  padding: 6px;
+}
+
+.grid-button-list > .icon,
+.grid-button-list div .icon {
+  /* margin: 0 6px; */
+  cursor: pointer;
+}
+
+.heading-right {
+  position: relative;
+}
+
+.heading-right .icon-close:hover + .suggestions,
+.heading-right .icon-help:hover + .suggestions {
+  display: block;
+}

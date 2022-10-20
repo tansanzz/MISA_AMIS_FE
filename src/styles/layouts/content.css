@@ -1,0 +1,7 @@
+.content-area {
+  position: relative;
+  overflow: hidden;
+  width: calc(100vw - 200px);
+  height: 100vh;
+}
+

@@ -1,0 +1,58 @@
+.text-color-title {
+    color: #FFFFFF;
+}
+
+.text-color-primary {
+    color: #DBDEE3;
+}
+
+.text-color-secondary {
+    color: #7B8798;
+}
+
+.text-color-disable {
+    color: #4B5B73;
+}
+
+.text-color-border {
+    color: #334560;
+}
+
+.text-color-background {
+    color: #182D4B;
+}
+
+.text-heading1 {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.text-heading2 {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.text-heading3 {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.text-subheader {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.text-body1 {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.text-body2 {
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.text-caption {
+    font-size: 13px;
+    font-weight: 400;
+}

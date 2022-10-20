@@ -1,0 +1,51 @@
+
+
+.content {
+  display: flex;
+  align-items: flex-start;
+}
+
+.content .icon-message {
+  margin-top: 12px;
+}
+
+.message-content {
+  overflow: auto;
+  max-height: 400px;
+  padding: 12px 0 32px 16px;
+}
+.mess-line {
+  height: 1px;
+  background-color: #b8bcc3;
+  margin-bottom: 20px;
+}
+
+.mess-footer {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mess-footer--mode1 {
+  justify-content: flex-end;
+}
+
+.mess-footer--mode2 {
+  justify-content: space-between;
+}
+
+.mess-footer--mode3 {
+  justify-content: space-between;
+}
+
+.mess-footer__left {
+  justify-self: flex-start;
+}
+
+.mess-footer__right {
+  justify-self: flex-end;
+  display: flex;
+  gap: 8px;
+}
+

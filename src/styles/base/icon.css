@@ -1,0 +1,214 @@
+.icon-48 {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.icon-36 {
+  width: 36px;
+  height: 36px;
+}
+
+.icon-24 {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+}
+
+.icon-16 {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+}
+
+.icon-14 {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+}
+
+.icon-12 {
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  min-height: 12px;
+}
+
+.icon {
+  background: url(../../assets/img/Sprites.64af8f61.svg) no-repeat;
+}
+
+.icon-green-pen {
+  filter: invert(48%) sepia(86%) saturate(1249%) hue-rotate(77deg)
+    brightness(106%) contrast(79%);
+  background-position: -753px -408px;
+}
+
+.icon-excel {
+  background-position: -704px -200px;
+}
+
+.icon-datepicker {
+  background-position: -123px -308px;
+}
+
+.icon-arrow-right {
+  background-position: -1346px -563px;
+  transform: rotate(90deg);
+}
+
+.icon-arrow-left {
+  background-position: -1346px -563px;
+  transform: rotate(-90deg);
+}
+
+.header-icon {
+  margin: 0 12px;
+}
+
+.icon-three-stripes {
+  background-position: -844px -30px;
+}
+
+.icon-chevron-down {
+  background-position: -1127px -361px;
+}
+
+.icon-chevron-left {
+  background-position: -1127px -361px;
+  transform: rotate(90deg);
+}
+
+.icon-chevron-right {
+  background-position: -1129px -360px;
+  transform: rotate(-90deg);
+}
+
+.icon-arrow-down--blue {
+  background-position: -896px -358px;
+}
+
+.icon-bell {
+  background-position: -787px -30px;
+}
+
+.icon-refresh {
+  background-position: -423px -200px;
+}
+
+.icon-help {
+  background-position: -730px -30px;
+}
+
+.icon-close {
+  background-position: -144px -144px;
+}
+
+.icon-close-small {
+  background-position: -1178px -362px;
+}
+
+.icon-error {
+  background-position: -536px -144px;
+}
+
+.icon-success {
+  background-position: -1600px -256px;
+}
+
+.icon-success-big {
+  background-position: -1290px -558px
+}
+
+/* .icon-close:hover {
+  filter: invert(11%) sepia(90%) saturate(6932%) hue-rotate(360deg)
+    brightness(102%) contrast(106%);
+  cursor: pointer;
+} */
+
+.icon-exclamation {
+  background-position: -746px -456px;
+}
+
+.icon-information {
+  background-position: -666px -456px;
+}
+
+.icon-question {
+  background-position: -826px -456px;
+}
+
+.icon-sidebar-dashboard {
+  background-position: -30px -1628px;
+}
+
+.icon-sidebar-cash {
+  background-position: -73px -1628px;
+}
+
+.icon-sidebar-bank {
+  background-position: -117px -1629px;
+}
+
+.icon-sidebar-purchase {
+  background-position: -161px -1629px;
+}
+
+.icon-sidebar-sale {
+  background-position: -204px -1628px;
+}
+
+.icon-sidebar-invoice {
+  background-position: -249px -1628px;
+}
+
+.icon-sidebar-stock {
+  background-position: -291px -1629px;
+}
+.icon-sidebar-tools {
+  background-position: -336px -1630px;
+}
+
+.icon-sidebar-fixed-assets {
+  background-position: -379px -1629px;
+}
+
+.icon-sidebar-tax {
+  background-position: -424px -1631px;
+}
+
+.icon-sidebar-price {
+  background-position: -468px -1630px;
+}
+
+.icon-sidebar-general {
+  background-position: -511px -1629px;
+}
+
+.icon-sidebar-budget {
+  background-position: -379px -1661px;
+}
+
+.icon-sidebar-report {
+  background-position: -549px -1633px;
+}
+
+.icon-sidebar-finance {
+  background-position: -204px -1664px;
+}
+
+.icon-arrow-dropdown {
+  background-position: -560px -358px;
+}
+
+.icon-checkbox-active {
+  background-position: -1224px -361px;
+}
+
+.icon-search {
+  background-position: -992px -360px;
+}

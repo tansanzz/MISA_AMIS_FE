@@ -1,0 +1,64 @@
+.m-btn {
+  display: inline-block;
+  min-width: 80px;
+  padding: 0 16px;
+  height: var(--primary-button-height);
+  border-radius: 4px;
+  text-align: center;
+  line-height: var(--primary-button-height);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.m-btn:focus {
+  box-shadow: 0px 3px 20px rgba(0, 0, 0, 0.1);
+}
+
+.m-pri-btn {
+  border: none;
+  background: var(--button-primary__background--enable);
+  color: var(--tc-primary-button);
+}
+
+.m-pri-btn:hover {
+  background-color: var(--button-primary__background--hover);
+  cursor: pointer;
+}
+
+.m-pri-btn:active {
+  background-color: var(--button-primary__background--pressed);
+}
+
+.m-sub-btn {
+  background: var(--button-secondary__background--enable);
+  border: 1px solid var(--sub-button__border-color);
+  color: var(--tc-sub-button);
+}
+
+.m-sub-btn:hover {
+  background-color: var(--button-secondary__background--hover);
+  cursor: pointer;
+}
+
+.m-sub-btn:active {
+  background-color: var(--button-secondary__background--pressed);
+  cursor: pointer;
+}
+
+.m-outline-btn {
+  background-color: #fff;
+}
+
+.m-danger-btn {
+  background-color: var(--button-danger__background--enable);
+  border: none;
+  color: #fff;
+}
+
+.m-danger-btn:hover {
+  background-color: var(--button-danger__background--hover);
+}
+
+.m-danger-btn:active {
+  background-color: var(--button-danger__background--pressed);
+}

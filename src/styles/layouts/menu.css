@@ -1,0 +1,63 @@
+.menu--container {
+  width: 200px;
+  font-size: 13px;
+  position: relative;
+  background-color: #041434;
+}
+
+.logo-container {
+  display: flex;
+  height: 56px;
+  align-items: center;
+}
+
+.menu-container-option {
+  width: 24px;
+  height: 24px;
+  background: url(../../assets/img/Sprites.64af8f61.svg) no-repeat -1153px -28px;
+  filter: brightness(10%) invert(100%);
+  margin: 0 16px;
+}
+
+.logo {
+  height: 32px;
+  display: block;
+}
+
+.logo .img-icon {
+  height: 32px;
+}
+
+.menu-item-list {
+  height: calc(100vh - 56px);
+  padding-top: 20px;
+}
+
+.parent-item-menu {
+  height: 44px;
+  position: relative;
+  margin-bottom: 4px;
+  margin: 0 12px;
+  border-radius: 4px;
+}
+
+.menu-item {
+  border-radius: 4px;
+  line-height: 42px;
+  height: 42px;
+  color: var(--d-title);
+  display: flex;
+  cursor: pointer;
+  border-left: 6px solid transparent;
+}
+
+.menu-item .menu-item__icon {
+  margin: 0 8px;
+  display: flex;
+  align-items: center;
+}
+
+.router-link-active {
+  background-color: #1E3155;
+  /* border-left-color: #299F31; */
+}
