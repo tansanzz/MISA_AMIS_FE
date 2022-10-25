@@ -8,7 +8,7 @@
             CÔNG TY TNHH SẢN XUẤT - THƯƠNG MẠI
           </div>
           <a>
-            <div class="header-icon icon icon-14 icon-chevron-down"></div>
+            <div class="header-icon icon icon-16 icon-chevron-down"></div>
           </a>
         </div>
       </div>
@@ -19,7 +19,7 @@
         <div class="account-info">
           <div class="user-avatar icon-avatar"></div>
           <div class="user-name sub-header">NGUYỄN XUÂN TẤN SAN</div>
-          <div class="header-icon icon icon-14 icon-chevron-down"></div>
+          <div class="header-icon icon icon-16 icon-chevron-down"></div>
         </div>
       </div>
     </div>

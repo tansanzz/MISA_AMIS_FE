@@ -65,7 +65,7 @@
   <transition name="modal">
     <EmployeeDetail
       v-if="employeeDetail.isShow"
-      @closeModal="handleCloseEmployeeModal"
+      @closeModal="closeEmployeeModal"
       :modalMode="employeeDetail.modalMode"
       :employeeModal="employeeModal"
       @showToastMessage="showToastMessage"
@@ -122,7 +122,15 @@ import {
   getMessageWithVariable,
   MessageBox,
 } from "@/utils/resource.js";
-import { ref, onBeforeMount, computed, reactive, watch, onUpdated } from "vue";
+import {
+  ref,
+  onBeforeMount,
+  computed,
+  reactive,
+  watch,
+  onUpdated,
+  onMounted,
+} from "vue";
 import { useStore } from "vuex";
 import {
   filterEmployees,
@@ -135,6 +143,8 @@ const messageBoxModeEnum = {
   DELELE_ONE: "delete_one",
   DELELE_MANY: "delete_many",
 };
+import mitt from "mitt";
+
 export default {
   components: {
     MExportExcel,
@@ -149,6 +159,7 @@ export default {
     EmployeeDetail,
   },
   setup() {
+    const emitter = mitt();
     const { state, commit } = useStore();
     const employees = reactive({
       Data: [],
@@ -252,6 +263,11 @@ export default {
       isShow: false,
       modalMode: FormEnum.MODE_ADD,
     });
+    const messageInToast = computed(() => state.toastMessage);
+
+    watch(messageInToast, () => {
+      console.log(messageInToast.value);
+    });
     const isDataReady = ref(false);
     const messageBox = reactive({
       mode: 1,
@@ -269,19 +285,27 @@ export default {
       textColor: toastMessage.TEXT_GREEN,
       text: toastMessage.SUCCESS_DELETE_EMPLOYEE,
     });
-    var oldEmployee = {};
 
     onBeforeMount(async () => {
       await handleLoadData();
-      const localPageSize = localStorage.getItem("pageSize");
     });
+
+    onMounted(async () => {
+      emitter.on("error", (e) => console.log(e));
+    });
+
+    const localPageSize = localStorage.getItem("pageSize");
+    pageSize.value = parseInt(localPageSize);
 
     /****************************************
      * Thay đổi các thuộc tính cho MessageBox
      * NXTSAN 10-10-2022
      */
     const setMessageBoxMode = (messageBoxMode) => {
+      // Thay đổi tiêu đề cho message box
       messageBox.title = ModalMessage.DataChange.delete[state.language];
+
+      // Chuyển chế đố message box sang xoá 1
       if (messageBoxMode == messageBoxModeEnum.DELELE_ONE) {
         messageBox.messages = messageBox.message = [
           getMessageWithVariable(
@@ -289,6 +313,7 @@ export default {
             table.rowSelected.EmployeeCode
           ),
         ];
+        // Cập nhật các button trong message box xoá 1
         messageBox.buttons = {
           close: {
             text: MessageBox.close.TEXT,
@@ -298,51 +323,21 @@ export default {
               messageBox.isShow = false;
             },
           },
+          // Button chấp nhận
           confirm: {
             text: MessageBox.confirmDelete.TEXT,
             tabindex: MessageBox.confirmDelete.TABINDEX,
             variant: MessageBox.confirmDelete.VARIANT,
-            callback: async () => {
-              const response = await deleteEmployee(
-                table.rowSelected.EmployeeID
-              );
-              if (!response.Success) {
-                showToastMessage(
-                  toastMessage.ERROR,
-                  toastMessage.ERROR_TEXT,
-                  toastMessage.TEXT_RED,
-                  getMessageWithVariable(
-                    toastMessage.ERROR_DELETE_A_EMPLOYEE,
-                    table.rowSelected.EmployeeCode
-                  )
-                );
-              } else {
-                const index = selectedEmployees.value.indexOf(
-                  table.rowSelected
-                );
-                if (index > -1) {
-                  selectedEmployees.value.splice(index, 1);
-                  selectedEmployees.value = [...selectedEmployees.value];
-                }
-                showToastMessage(
-                  toastMessage.SUCCESS,
-                  toastMessage.SUCCESS_TEXT,
-                  toastMessage.TEXT_GREEN,
-                  getMessageWithVariable(
-                    toastMessage.SUCCESS_DELETE_A_EMPLOYEE,
-                    table.rowSelected.EmployeeCode
-                  )
-                );
-                handleLoadData();
-              }
-              messageBox.isShow = false;
-            },
+            callback: handleDeleteEmployee,
           },
         };
       } else {
+        // Thay đổi nội dung tin nhắn message box
         messageBox.message = [
           ErrorValidate.ConfirmDeleteEmployees[state.language],
         ];
+
+        // Cập nhật các nút trong message box
         messageBox.buttons = {
           close: {
             text: MessageBox.close.TEXT,
@@ -352,42 +347,82 @@ export default {
               messageBox.isShow = false;
             },
           },
+
+          // Nút chấp nhận
           confirm: {
             text: MessageBox.confirmDelete.TEXT,
             tabindex: MessageBox.confirmDelete.TABINDEX,
             variant: MessageBox.confirmDelete.VARIANT,
-            callback: async () => {
-              try {
-                const response = await batchDeleteEmployees(deleteEmployeeIDs);
-                if (!response.Success) {
-                  showToastMessage(
-                    toastMessage.ERROR,
-                    toastMessage.ERROR_TEXT,
-                    toastMessage.TEXT_RED,
-                    toastMessage.ERROR_DELETE_EMPLOYEE
-                  );
-                } else {
-                  showToastMessage(
-                    toastMessage.SUCCESS,
-                    toastMessage.SUCCESS_TEXT,
-                    toastMessage.TEXT_GREEN,
-                    toastMessage.SUCCESS_DELETE_EMPLOYEE
-                  );
-                  selectedEmployees.value = [];
-                  handleLoadData();
-                }
-                messageBox.isShow = false;
-              } catch (error) {
-                showToastMessage(
-                  toastMessage.ERROR,
-                  toastMessage.ERROR_TEXT,
-                  toastMessage.TEXT_RED,
-                  ToastMessage.ERROR_SERVER
-                );
-              }
-            },
+            callback: handleBatchDeleteEmployees,
           },
         };
+      }
+    };
+
+    /****************************************
+     * Xử lí xoá nhiều nhân viên
+     * NXTSAN 10-10-2022
+     */
+    const handleBatchDeleteEmployees = async () => {
+      try {
+        const deleteEmployeeIDs = getDeleteEmployeeIDs(selectedEmployees.value);
+        const response = await batchDeleteEmployees(deleteEmployeeIDs);
+        if (response.Success) {
+          showToastMessage(
+            toastMessage.SUCCESS,
+            toastMessage.SUCCESS_TEXT,
+            toastMessage.TEXT_GREEN,
+            toastMessage.SUCCESS_DELETE_EMPLOYEE
+          );
+          selectedEmployees.value = [];
+          handleLoadData();
+        }
+        messageBox.isShow = false;
+      } catch (error) {
+        showToastMessage(
+          toastMessage.ERROR,
+          toastMessage.ERROR_TEXT,
+          toastMessage.TEXT_RED,
+          ToastMessage.ERROR_SERVER
+        );
+      }
+    };
+
+    /****************************************
+     * Xử lí xoá 1 nhân viên
+     * NXTSAN 10-10-2022
+     */
+    const handleDeleteEmployee = async () => {
+      try {
+        const response = await deleteEmployee(table.rowSelected.EmployeeID);
+        if (response.Success) {
+          const index = selectedEmployees.value.indexOf(table.rowSelected);
+          if (index > -1) {
+            selectedEmployees.value.splice(index, 1);
+            selectedEmployees.value = [...selectedEmployees.value];
+          }
+          showToastMessage(
+            toastMessage.SUCCESS,
+            toastMessage.SUCCESS_TEXT,
+            toastMessage.TEXT_GREEN,
+            getMessageWithVariable(
+              toastMessage.SUCCESS_DELETE_A_EMPLOYEE,
+              table.rowSelected.EmployeeCode
+            )
+          );
+          handleLoadData();
+        }
+        messageBox.isShow = false;
+      } catch (error) {
+        showToastMessage(
+          toastMessage.ERROR,
+          toastMessage.ERROR_TEXT,
+          toastMessage.TEXT_RED,
+          getMessageWithVariable(
+            toastMessage.ERROR_DELETE_A_EMPLOYEE,
+            table.rowSelected.EmployeeCode
+          )
+        );
       }
     };
 
@@ -397,12 +432,21 @@ export default {
      */
     var toastTimeout;
     const showToastMessage = (variant, status, textColor, text) => {
+      // Gán biến thể cho toast message
       toast.variant = variant;
+
+      // Gán trạng thái cho toast message
       toast.status = status;
+
+      // Thay đổi màu chữ cho toast message
       toast.textColor = textColor;
+
+      // Gán nội dung cho toast message
       toast.text = text;
       toast.isShow = true;
       const TIME = 5000;
+
+      // Ẩn toast message sau 5s
       if (toastTimeout) {
         clearTimeout(toastTimeout);
         toastTimeout = null;
@@ -418,32 +462,31 @@ export default {
      */
     const handleGetEmployees = async (pageSize, pageNumber, employeeFilter) => {
       try {
+        // Lấy danh sách nhân viên theo bộ lọc
         employeeFilter = employeeFilter || "";
         const response = await filterEmployees(
           pageSize,
           pageNumber,
           employeeFilter
         );
+
+        // Kiểm tra kết quả trả về
         if (response.Success) {
+          // Nếu kết quả trả về thành công thì lấy dữ liệu thành công
           const data = response.Data;
+
+          // Gán dữ liệu cho danh sách nhân viên
           employees.Data = data.Data;
           employees.TotalCount = data.TotalCount;
           return employees;
-        } else {
-          showToastMessage(
-            toastMessage.ERROR,
-            toastMessage.ERROR_TEXT,
-            toastMessage.TEXT_RED,
-            toastMessage.SERVER_ERROR
-          );
         }
       } catch (error) {
         showToastMessage(
-            toastMessage.ERROR,
-            toastMessage.ERROR_TEXT,
-            toastMessage.TEXT_RED,
-            toastMessage.SERVER_ERROR
-          );
+          toastMessage.ERROR,
+          toastMessage.ERROR_TEXT,
+          toastMessage.TEXT_RED,
+          toastMessage.SERVER_ERROR
+        );
       }
     };
 
@@ -456,14 +499,18 @@ export default {
      * NXTSAN 18-09-2022
      */
     const handleLoadData = async () => {
+      // Khởi chạy loading trước khi lấy dữ liệu
       commit("changeLoadStatus");
       pageNumber.value = 1;
-      // employeeFilter.value = "";
+
+      // Lấy dữ liệu
       await handleGetEmployees(
         pageSize.value,
         pageNumber.value,
         employeeFilter.value
       );
+
+      // Kết thúc loading khi lấy dữ liệu xong
       commit("changeLoadStatus");
     };
 
@@ -482,6 +529,8 @@ export default {
      */
     function handleDeleteRow(row) {
       table.rowSelected = row;
+
+      // Hiện message box xác nhận xoá 1 nhân viên
       setMessageBoxMode(messageBoxModeEnum.DELELE_ONE);
       messageBox.isShow = true;
     }
@@ -491,13 +540,22 @@ export default {
      * NXTSAN 04-10-2022
      */
     async function handleDuplicateRow(data) {
-      const response = await getEmployeeByID(data.EmployeeID);
-      if (response.Success) {
-        const data = response.Data;
-        employeeModal.value = data;
-        employeeDetail.value.modalMode = FormEnum.MODE_DUPLICATE;
-        employeeDetail.value.isShow = true;
-      } else {
+      try {
+        // Lấy mã nhân viên mới
+        const response = await getEmployeeByID(data.EmployeeID);
+
+        // Kiểm tra kết quả trả về
+        if (response.Success) {
+          // Nếu thành công thì lấy dữ liệu thành công
+          const data = response.Data;
+
+          // Khởi tạo form nhân bản
+          employeeModal.value = data;
+          employeeDetail.value.modalMode = FormEnum.MODE_DUPLICATE;
+          employeeDetail.value.isShow = true;
+        }
+      } catch (error) {
+        // Nếu thất bại thì hiển thị toast message báo lỗi
         showToastMessage(
           toastMessage.ERROR,
           toastMessage.ERROR_TEXT,
@@ -512,7 +570,8 @@ export default {
      * NXTSAN 18-09-2022
      */
     const handleClickAddEmployee = () => {
-      employeeModal.value = oldEmployee;
+      // Khởi tạo các thuộc tính và mở form thêm nhân viên
+      employeeModal.value = {};
       employeeDetail.value.modalMode = FormEnum.MODE_ADD;
       employeeDetail.value.isShow = true;
     };
@@ -529,13 +588,20 @@ export default {
      */
     const handleDblClickRow = async (data) => {
       try {
+        // Lấy dữ liệu khi nhấn 2 lần vào hàng
         const response = await getEmployeeByID(data.EmployeeID);
+
+        // Kiểm tra kết quả trả về
         if (response.Success) {
+          // Nếu thành công thì lấy thông tin của nhân viên
           const data = response.Data;
           employeeModal.value = data;
+
+          // Mở form sửa nhân viên
           employeeDetail.value.modalMode = FormEnum.MODE_EDIT;
           employeeDetail.value.isShow = true;
         } else {
+          // Nếu thất bại thì hiển thị toast message báo lỗi
           showToastMessage(
             toastMessage.ERROR,
             toastMessage.ERROR_TEXT,
@@ -554,18 +620,19 @@ export default {
     };
 
     /**********************
-     * Xử lí đóng form nhập liệu
+     * Đóng form nhập liệu
      * NXTSAN 18-09-2022
      */
-    const handleCloseEmployeeModal = async () => {
-      if (state.isValidate) commit("setValidate");
-      // oldEmployee = employee;
-      await handleLoadData();
+    const closeEmployeeModal = async () => {
+      // Load lại dữ liệu
+      refreshData();
+
+      // Ẩn form nhập liệu
       employeeDetail.value.isShow = false;
     };
 
     /***********************
-     * Xu ly phan trang
+     * Phân trang
      * NXTSAN 18-09-2022
      */
     const handlePaging = (index) => {
@@ -578,14 +645,19 @@ export default {
     };
 
     /***********************
-     * Xu ly thay doi so ban ghi tren 1 trang
+     * Thay đổi số lượng bản ghi trên 1 trang
      * NXTSAN 18-09-2022
      */
     const selectedIndex = ref(0);
     const handleChangePageSize = async (pageSizeEmit, index) => {
+      // Lưu lại số lượng bản ghi trên 1 trang lại vào bộ nhớ local
+      localStorage.setItem("pageSize", pageSizeEmit);
       selectedIndex.value = index;
+
+      // Cập nhật số lượng bản ghi trên 1 trang mới
       pageSize.value = pageSizeEmit;
-      console.log("change page size");
+
+      // Load lại dữ liệu
       await handleLoadData();
       isDataReady.value = true;
     };
@@ -596,11 +668,16 @@ export default {
      */
     let timeout = null;
     const handleSearching = (employeeFilters, event) => {
-      let delay = 800;
+      // Độ trễ 2s
+      let delay = 2000;
+
+      // Nếu vẫn đang đợi thì không đợi nữa
       if (timeout) {
         clearTimeout(timeout);
         timeout = null;
       }
+
+      // Tiếp tục đợi mới
       timeout = setTimeout(() => {
         pageNumber.value = 1;
         handleGetEmployees(
@@ -616,9 +693,14 @@ export default {
      * NXTSAN 09-10-2022
      */
     const getSelectedEmployees = (selectedRows, option) => {
+      // Kiểm tra khi check và uncheck hàng
       if (option === "add") {
+        // Nếu check thì cập nhật lại các nhân viên đã chọn
         selectedEmployees.value = [...selectedEmployees.value, selectedRows];
       } else if (option === "remove") {
+        // Nếu uncheck thì xoá nhân viên đã chọn khỏi danh sách
+
+        // Tìm index của nhân viên muốn bỏ chọn khỏi danh sách
         var selectedIndex = -1;
         for (const index in selectedEmployees.value) {
           const row = selectedEmployees.value[index];
@@ -627,6 +709,8 @@ export default {
             break;
           }
         }
+
+        // Nếu tìm được thì xoá nhân viên có index đã tìm được khỏi danh sách
         if (selectedIndex > -1) {
           selectedEmployees.value.splice(selectedIndex, 1);
           selectedEmployees.value = [...selectedEmployees.value];
@@ -638,9 +722,8 @@ export default {
      * Thực hiện xoá hàng loạt các bản ghi
      * NXTSAN 09-10-2022
      */
-    var deleteEmployeeIDs = [];
     const batchDelete = () => {
-      deleteEmployeeIDs = getDeleteEmployeeIDs(selectedEmployees.value);
+      // Mở message box xác nhận xoá nhiều
       setMessageBoxMode(messageBoxModeEnum.DELELE_MANY);
       messageBox.isShow = true;
     };
@@ -650,7 +733,10 @@ export default {
      * NXTSAN 09-10-2022
      */
     const getDeleteEmployeeIDs = (selectedEmployees) => {
-      deleteEmployeeIDs = [];
+      // Danh sách các ID các nhân viên muốn xoá
+      var deleteEmployeeIDs = [];
+
+      // Thêm các ID của nhân viên từ danh sách nhân viên đã chọn
       for (const employee of selectedEmployees) {
         deleteEmployeeIDs.push(employee.EmployeeID);
       }
@@ -682,7 +768,7 @@ export default {
       handleDeleteRow,
       handleClickAddEmployee,
       handleDblClickRow,
-      handleCloseEmployeeModal,
+      closeEmployeeModal,
       employeeModal,
       employeeDetail,
       messageBox,

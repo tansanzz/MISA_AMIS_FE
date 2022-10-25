@@ -67,3 +67,7 @@
   display: flex;
   gap: 12px;
 }
+
+.heading-right .icon {
+  cursor: pointer;
+}

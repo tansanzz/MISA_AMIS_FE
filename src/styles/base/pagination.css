@@ -30,6 +30,10 @@
   margin-right: 16px;
 }
 
+.text-blur {
+  color: #666666;
+}
+
 .pagination .pagination-bar .right-pagination {
   display: flex;
   justify-content: flex-end;
@@ -61,6 +65,12 @@
   font-weight: 700;
 }
 
+.page-number {
+  padding: 0 0.5rem;
+  font-size: 13px;
+  cursor: pointer;
+}
+
 .disableText {
   cursor: default !important;
   filter: brightness(0) saturate(100%) invert(34%) sepia(12%) saturate(0%)
@@ -70,6 +80,11 @@
 .record-in-page {
   /* width: 76px;
   min-width: 76px; */
+}
+
+.page-number-wrapper {
+  display: flex;
+  align-items: center;
 }
 
 .paging-icon-wrapper {

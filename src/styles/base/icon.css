@@ -88,6 +88,11 @@
   transform: rotate(-90deg);
 }
 
+.icon-arrow-down {
+  background-position: -896px -358px;
+  filter: brightness(0) saturate(100%)
+}
+
 .icon-arrow-down--blue {
   background-position: -896px -358px;
 }

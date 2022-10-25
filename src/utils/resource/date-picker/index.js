@@ -1,5 +1,5 @@
 const INVALID_DATE = {
-  VI: "Ngày không được lớn hơn ngày hiện tại",
+  VI: "Ngày không hợp lệ",
 };
 
 export { INVALID_DATE };

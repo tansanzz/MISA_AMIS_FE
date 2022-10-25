@@ -23,18 +23,76 @@
       </div>
     </div>
     <div class="datepicker" v-if="isShowCalender" ref="refCalender">
+      <div class="year-picker-wrapper" v-if="isShowYearPicker">
+        <div class="year-picker">
+          <div
+            class="year-picker__column"
+            v-for="yearList in yearPicker"
+            :key="yearList"
+          >
+            <div
+              :class="[
+                'year-picker__row',
+                { 'year-selected': year == dateHeader.year },
+              ]"
+              v-for="year in yearList"
+              :key="year"
+              @click="selectYear(year)"
+            >
+              {{ year }}
+            </div>
+          </div>
+        </div>
+        <div class="cancel-year-picker" @click="isShowYearPicker = false">
+          Huỷ
+        </div>
+      </div>
+      <div class="year-picker-wrapper" v-if="isShowMonthPicker">
+        <div class="year-picker">
+          <div
+            class="year-picker__column"
+            v-for="monthList in getMonthPicker()"
+            :key="monthList"
+          >
+            <div
+              :class="[
+                'year-picker__row',
+                { 'year-selected': month == dateHeader.month },
+              ]"
+              v-for="month in monthList"
+              :key="month"
+              @click="selectMonth(month)"
+            >
+              Thg {{ month }}
+            </div>
+          </div>
+        </div>
+        <div class="cancel-year-picker" @click="isShowMonthPicker = false">
+          Huỷ
+        </div>
+      </div>
       <div class="calendar-header">
-        <div class="calender-current-date">
+        <div class="calender-current-date" @click="showYearPicker">
           Tháng {{ dateHeader.month }}, {{ dateHeader.year }}
         </div>
         <div class="icons-wrapper">
-          <div class="icon-wrapper">
+          <div
+            :class="[
+              'icon-wrapper',
+              { 'icon-wrapper-rotate': isShowYearPicker },
+            ]"
+          >
             <div
               class="icon icon-16 icon-chevron-left"
               @click="updateNewMonth(dateHeader.month - 1)"
             ></div>
           </div>
-          <div class="icon-wrapper">
+          <div
+            :class="[
+              'icon-wrapper',
+              { 'icon-wrapper-rotate': isShowYearPicker },
+            ]"
+          >
             <div
               class="icon icon-16 icon-chevron-right"
               @click="updateNewMonth(dateHeader.month + 1)"
@@ -109,9 +167,10 @@ export default {
     tabindex: Number,
     modelValue: String,
     maxDate: Date,
+    minDate: Date,
   },
   setup(props, context) {
-    const { modelValue, maxDate } = toRefs(props);
+    const { modelValue, maxDate, minDate } = toRefs(props);
     const refCalender = ref(null);
     const refButton = ref(null);
     const isShowCalender = ref(false);
@@ -130,6 +189,9 @@ export default {
     const { state } = useStore();
     const isInvalidDate = ref(false);
     const errorMessage = ref("");
+    const isShowYearPicker = ref(false);
+    const isShowMonthPicker = ref(false);
+    const yearPicker = ref([]);
     if (state.language) {
       errorMessage.value = INVALID_DATE[state.language];
     } else {
@@ -213,7 +275,16 @@ export default {
      * Xử lý khi thay đổi tháng
      * NXTSAN 03-10-2022
      */
+    var currentYearPicker;
     const updateNewMonth = (dateHeaderMonth) => {
+      if (isShowYearPicker) {
+        if (dateHeaderMonth > dateHeader.value.month) {
+          yearPicker.value = getYearPicker((currentYearPicker += 12));
+        } else {
+          yearPicker.value = getYearPicker((currentYearPicker -= 12));
+        }
+        return;
+      }
       if (dateHeaderMonth < 1) {
         dateHeader.value.month = 12;
         dateHeader.value.year -= 1;
@@ -241,6 +312,20 @@ export default {
               year: dateHeader.value.year,
             },
             maxDate.value
+          )
+        ) {
+          return;
+        }
+      }
+      if (minDate.value) {
+        if (
+          !isMoreThanMinDate(
+            {
+              date: date,
+              month: dateHeader.value.month,
+              year: dateHeader.value.year,
+            },
+            minDate.value
           )
         ) {
           return;
@@ -292,11 +377,20 @@ export default {
         var tempMonth = dateArray[1];
         var tempYear = dateArray[2];
 
-        if (maxDate.value && tempYear[3] != "_") {
+        if (tempYear[3] != "_") {
           if (
+            maxDate.value &&
             !isLessThanMaxDate(
               { date: +tempDate, month: +tempMonth, year: +tempYear },
               maxDate.value
+            )
+          )
+            isValidDate = false;
+          if (
+            minDate.value &&
+            !isMoreThanMinDate(
+              { date: +tempDate, month: +tempMonth, year: +tempYear },
+              minDate.value
             )
           )
             isValidDate = false;
@@ -322,6 +416,10 @@ export default {
       event.preventDefault();
     };
 
+    /******************************
+     * Kiểm tra ngày hợp lệ
+     * NXTSAN 03-10-2022
+     */
     const isValidDateInput = (date) => {
       if (/^([1-2_][0-9_])|([0_][1-9_])|([3_][0-1_])$/.test(date) == false) {
         return false;
@@ -329,6 +427,10 @@ export default {
       return true;
     };
 
+    /******************************
+     * Kiểm tra tháng hợp lệ
+     * NXTSAN 03-10-2022
+     */
     const isValidMonthInput = (month) => {
       if (/^([0_][0-9_])|([1_][0-2_])$/.test(month) == false) {
         return false;
@@ -336,10 +438,18 @@ export default {
       return true;
     };
 
+    /******************************
+     * Thay thế ký tự số ở cuối thành ký tự '_'
+     * NXTSAN 03-10-2022
+     */
     const removeLastCharBy = (string, char) => {
       return string.replace(new RegExp("[0-9]([^0-9]*)$"), char + "$1");
     };
 
+    /******************************
+     * So sánh ngày hiện tại và ngày lớn nhất
+     * NXTSAN 03-10-2022
+     */
     const isLessThanMaxDate = (currentDate, maxDate) => {
       var _maxDate = maxDate.getDate();
       var _maxMonth = maxDate.getMonth() + 1;
@@ -355,6 +465,31 @@ export default {
         currentDate.year == _maxYear &&
         currentDate.month == _maxMonth &&
         currentDate.date <= _maxDate
+      ) {
+        return true;
+      }
+      return false;
+    };
+
+    /******************************
+     * So sánh ngày hiện tại và ngày nhỏ nhất
+     * NXTSAN 03-10-2022
+     */
+    const isMoreThanMinDate = (currentDate, minDate) => {
+      var _minDate = minDate.getDate();
+      var _minMonth = minDate.getMonth() + 1;
+      var _minYear = minDate.getFullYear();
+      if (currentDate.year > _minYear) {
+        return true;
+      } else if (
+        currentDate.year == _minYear &&
+        currentDate.month > _minMonth
+      ) {
+        return true;
+      } else if (
+        currentDate.year == _minYear &&
+        currentDate.month == _minMonth &&
+        currentDate.date >= _minDate
       ) {
         return true;
       }
@@ -389,7 +524,86 @@ export default {
       }
     };
 
+    /******************************
+     * Lấy các năm ở date picker
+     * NXTSAN 24-10-2022
+     */
+    const getYearPicker = (year) => {
+      var yearPicker = [];
+      var rows = [];
+      const NUMBER_OF_ROWS = 3;
+      const NUMBER_OF_COLUMNS = 4;
+      var currentYear = year;
+      for (let i = 0; i < NUMBER_OF_ROWS; i++) {
+        rows = [];
+        for (let j = 0; j < NUMBER_OF_COLUMNS; j++) {
+          rows.push(currentYear);
+          currentYear--;
+        }
+        yearPicker.push(rows);
+      }
+      return yearPicker;
+    };
+
+    /******************************
+     * Hiển thi bộ chọn năm
+     * NXTSAN 24-10-2022
+     */
+    const showYearPicker = () => {
+      currentYearPicker = dateHeader.value.year;
+      isShowYearPicker.value = !isShowYearPicker.value;
+      yearPicker.value = getYearPicker(dateHeader.value.year);
+    };
+
+    /******************************
+     * Lấy các tháng ở date picker
+     * NXTSAN 24-10-2022
+     */
+    const getMonthPicker = () => {
+      var monthPicker = [];
+      var rows = [];
+      const NUMBER_OF_ROWS = 3;
+      const NUMBER_OF_COLUMNS = 4;
+      var currentMonth = 1;
+      for (let i = 0; i < NUMBER_OF_ROWS; i++) {
+        rows = [];
+        for (let j = 0; j < NUMBER_OF_COLUMNS; j++) {
+          rows.push(currentMonth);
+          currentMonth++;
+        }
+        monthPicker.push(rows);
+      }
+      return monthPicker;
+    };
+
+    /******************************
+     * Bấm chọn năm
+     * NXTSAN 24-10-2022
+     */
+    const selectYear = (year) => {
+      isShowMonthPicker.value = true;
+      dateHeader.value.year = year;
+    };
+
+    /******************************
+     * Bấm chọn tháng
+     * NXTSAN 24-10-2022
+     */
+    const selectMonth = (month) => {
+      isShowMonthPicker.value = false;
+      isShowYearPicker.value = false;
+      dateHeader.value.month = month;
+    };
+
     return {
+      yearPicker,
+      selectMonth,
+      selectYear,
+      getMonthPicker,
+      showYearPicker,
+      getYearPicker,
+      isShowYearPicker,
+      isShowMonthPicker,
       refInput,
       isInvalidDate,
       errorMessage,
@@ -477,6 +691,70 @@ export default {
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.051);
 }
 
+.year-picker-wrapper {
+  position: absolute;
+  background-color: #31af21;
+  left: 50%;
+  transform: translate(-50%, 0);
+  top: 70px;
+  border-radius: 4px;
+  padding: 0 12px;
+}
+
+.year-picker-wrapper::after {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid #31af21;
+  position: absolute;
+  top: 1px;
+  transform: translate(10px, -100%);
+}
+
+.year-picker {
+  margin: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.year-picker__column {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.year-picker__row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  min-width: 65px;
+  color: #fff;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.year-selected {
+  background-color: #fff;
+  color: #08bf1e;
+  border-radius: 4px;
+}
+
+.cancel-year-picker {
+  text-align: center;
+  color: #fff;
+  margin-bottom: 24px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .calendar-header {
   margin-top: 28px;
   margin-bottom: 13px;
@@ -497,6 +775,10 @@ export default {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+.calendar-header .icons-wrapper .icon-wrapper-rotate {
+  transform: rotate(-90deg);
 }
 
 .calendar-header .calender-current-date {
@@ -536,11 +818,6 @@ export default {
   cursor: pointer;
   font-size: 14px;
 }
-/* .calendar-table thead tr th,
-td {
-  width: 32px;
-  height: 32px;
-} */
 
 .date-day-seleted {
   color: #fff;

@@ -233,10 +233,10 @@ export default {
             currentItemIndex.value = items.value.length - 1;
           break;
         case keyCode.ENTER:
-          console.log("enter");
-          item.value = items.value[currentItemIndex.value].value;
-          isShowItems.value = false;
-          context.emit("update:id", items.value[currentItemIndex.value].id);
+          handleSelectItem(
+            items.value[currentItemIndex.value].id,
+            items.value[currentItemIndex.value].value
+          );
           break;
         case keyCode.TAB:
           isShowItems.value = false;

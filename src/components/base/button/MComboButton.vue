@@ -1,14 +1,22 @@
 <template>
   <div class="combo-button-wrapper">
-    <button class="m-btn m-outline-btn" >
+    <button class="m-btn m-outline-btn">
       {{ text }}
     </button>
-    <div class="icon-wrapper" @click="isShow = !isShow && data.length > 0" ref="refButton">
-      <div class="icon icon-16 icon-chevron-down"></div>
+
+    <div
+      class="icon-wrapper"
+      @click="isShow = !isShow && data.length > 0"
+      ref="refButton"
+    >
+      <div class="icon icon-16 icon-arrow-down"></div>
     </div>
-    <div v-if="data.length > 0" class="items" v-show="isShow" ref="refItems">
-      <div class="item" @click="batchDelete">Xoá</div>
-    </div>
+
+    <Transition name="button">
+      <div v-if="data.length > 0" class="items" v-show="isShow" ref="refItems">
+        <div class="item" @click="batchDelete">Xoá</div>
+      </div>
+    </Transition>
   </div>
 </template>
 <script>
@@ -67,27 +75,43 @@ export default {
   position: relative;
 }
 
+.button-enter-active,
+.button-leave-active {
+  transition: ease 0.2s;
+}
+
+.button-enter-from,
+.button-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
 .combo-button-wrapper .m-btn {
   outline: none;
-  border: 1px solid #000;
+  border: 2px solid #000;
+  border-radius: 40px;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
   border-right: none;
   font-size: 14px;
   font-weight: 500;
+  line-height: unset;
+  padding-right: 0;
 }
 
 .icon-wrapper {
-  border-radius: 4px;
-  border: 1px solid #000;
+  border-radius: 40px;
+  border: 2px solid #000;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
+  border-left: none;
   display: flex;
   align-items: center;
 }
 
 .icon-wrapper .icon {
-  margin: 0 12px;
+  margin-left: 6px;
+  margin-right: 12px;
 }
 
 .items {
@@ -95,10 +119,10 @@ export default {
   position: absolute;
   right: 0;
   top: 100%;
-  border-radius: 4px;
-  margin-top: 2px;
+  margin-top: 1px;
   z-index: 3;
   background-color: #fff;
+  border: 1px solid #babec5;
 }
 
 .item {

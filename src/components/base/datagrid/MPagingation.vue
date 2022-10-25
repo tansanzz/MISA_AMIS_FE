@@ -2,10 +2,10 @@
   <div class="pagination">
     <div class="pagination-bar">
       <div class="left-pagination">
-        <pre>Tổng số: <b>{{totalRecord}}</b> bản ghi</pre>
+        <pre>Tổng số: <b>{{totalRecord}}</b> <span class="text-blur">bản ghi</span></pre>
       </div>
       <div class="right-pagination">
-        <div class="paging-record-per-page">Số bản ghi/trang</div>
+        <div class="paging-record-per-page text-blur">Số bản ghi/trang</div>
         <div class="record-in-page">
           <MCombobox
             readonly
@@ -14,42 +14,38 @@
             placement="top"
             size="small"
             :data="pageSizesConvert"
-            :initialValue="pageSizesConvert[0].value"
+            :initialValue="pageSize"
             @getValue="handleChangePageSize"
           />
-        </div>
-        <div class="paging-count-record">
-          <b
-            >{{ (pageNumber - 1) * pageSize + 1 }} -
-            {{ pageNumber * pageSize + 1 }}</b
-          >
-          bản ghi
         </div>
         <div class="page-button">
           <div class="prev-page">
             <div
-              class="paging-icon-wrapper"
+              :class="[{ disableText: currentPageIndex == 1 }]"
               @click="handlePagination(currentPageIndex - 1)"
             >
-              <div
-                :class="[
-                  'icon icon-16 icon-chevron-left',
-                  { disableText: currentPageIndex == 1 },
-                ]"
-              ></div>
+              Trước
+            </div>
+          </div>
+          <div class="page-number-wrapper">
+            <div
+              v-for="pageNumber in pageNumbers"
+              :class="[
+                'page-number',
+                { pageSelected: currentPageIndex == pageNumber },
+              ]"
+              :key="pageNumber"
+              @click="handlePagination(pageNumber)"
+            >
+              {{ pageNumber }}
             </div>
           </div>
           <div class="next-page">
             <div
-              class="paging-icon-wrapper"
+              :class="[{ disableText: currentPageIndex == numOfPages }]"
               @click="handlePagination(currentPageIndex + 1)"
             >
-              <div
-                :class="[
-                  'icon icon-16 icon-chevron-right',
-                  { disableText: currentPageIndex == numOfPages },
-                ]"
-              ></div>
+              Sau
             </div>
           </div>
         </div>
@@ -63,7 +59,7 @@
 import MCombobox from "@/components/base/input/MCombobox.vue";
 import MDropdown from "@/components/base/input/MDropdown.vue";
 
-import { computed, onBeforeMount, ref, toRefs, onUpdated } from "vue";
+import { computed, toRefs } from "vue";
 export default {
   components: {
     MCombobox,
@@ -76,11 +72,14 @@ export default {
     pageNumber: Number,
   },
   setup(props, context) {
-    const { totalRecord, pageSizes, pageSize } = toRefs(props);
-    const currentPageIndex = ref(1);
+    const { totalRecord, pageSizes, pageSize, pageNumber } = toRefs(props);
+
+    const currentPageIndex = computed(() => pageNumber.value);
+
     let numOfPages = computed(() =>
       Math.ceil(totalRecord.value / pageSize.value)
     );
+
     const pageSizesConvert = computed(() => {
       var tempPageSizes = [];
       for (const pagesize of pageSizes.value) {
@@ -92,35 +91,36 @@ export default {
       }
       return tempPageSizes;
     });
-    const paginationList = ref([]);
 
-    onBeforeMount(() => {
-      getPaginationList(1);
-    });
-
-    onUpdated(() => {
-      console.log("re-render");
-    });
-
-    /**********************
-     * Lấy danh sách index để phân trang
-     * NXTSAN 19-9-2022
-     */
-    const getPaginationList = (pageIndex) => {
-      paginationList.value = [];
-      var start = Math.max(2, pageIndex);
-      var end = Math.min(
-        pageIndex <= 2 ? start + 1 : start + 2,
-        numOfPages.value
+    const pageNumbers = computed(() => {
+      var array = [];
+      const PAGE_NUMBER_START = 1;
+      const PAGE_NUMBER_END = numOfPages.value;
+      const PAGE_NUMBER_SPACE = 3;
+      var start = Math.max(
+        PAGE_NUMBER_START,
+        currentPageIndex.value > PAGE_NUMBER_END - PAGE_NUMBER_SPACE + 1
+          ? PAGE_NUMBER_END - PAGE_NUMBER_SPACE + 1
+          : currentPageIndex.value - 1
       );
-      if (end < numOfPages.value) paginationList.value.push(1);
-      if (start > 2) paginationList.value.push("...");
-      for (var i = start; i <= end; i++) {
-        paginationList.value.push(i);
+      var end = Math.min(
+        currentPageIndex.value < PAGE_NUMBER_SPACE
+          ? PAGE_NUMBER_START + PAGE_NUMBER_SPACE - 1
+          : currentPageIndex.value + 1,
+        PAGE_NUMBER_END
+      );
+      if (currentPageIndex.value >= PAGE_NUMBER_SPACE)
+        array.push(PAGE_NUMBER_START);
+      if (currentPageIndex.value > PAGE_NUMBER_SPACE) array.push("...");
+      for (let index = start; index <= end; index++) {
+        array.push(index);
       }
-      if (end < numOfPages.value) paginationList.value.push("...");
-      if (end < numOfPages.value) paginationList.value.push(numOfPages.value);
-    };
+      if (currentPageIndex.value < PAGE_NUMBER_END - PAGE_NUMBER_SPACE + 1)
+        array.push("...");
+      if (currentPageIndex.value <= PAGE_NUMBER_END - PAGE_NUMBER_SPACE + 1)
+        array.push(PAGE_NUMBER_END);
+      return array;
+    });
 
     /**********************
      * Xử lý phân trang
@@ -128,8 +128,6 @@ export default {
      */
     const handlePagination = (pageIndex) => {
       if (pageIndex >= 1 && pageIndex <= numOfPages.value) {
-        getPaginationList(pageIndex);
-        currentPageIndex.value = pageIndex;
         context.emit("paging", pageIndex);
       }
     };
@@ -143,9 +141,9 @@ export default {
     };
 
     return {
+      pageNumbers,
       numOfPages,
       currentPageIndex,
-      paginationList,
       pageSizesConvert,
       handlePagination,
       handleChangePageSize,

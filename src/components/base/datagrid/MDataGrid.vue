@@ -32,7 +32,7 @@
                 style="min-width: 120px; width: 120px"
                 class="th-viewer th-wiget text-right"
               >
-                <span class="head-title sub-header">chức năng</span>
+                <span class="head-title sub-header">Chức năng</span>
               </th>
             </tr>
           </thead>
@@ -478,7 +478,7 @@ export default {
   height: var(--grid-header-height);
   position: absolute;
   border-left: 1px dotted var(--l-border);
-  left: 0;
+  left: -1px;
   top: 0;
 }
 

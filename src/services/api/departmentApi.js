@@ -7,8 +7,12 @@ class DepartmentsApiService extends ModelApiService {
 
 const departmentApi = new DepartmentsApiService();
 
+/********************
+ * Lấy tất cả đơn vị
+ * NXTSAN 10-10-2022
+ */
 const getAllDepartments = async (config) => {
-  return await departmentApi.fetch(config);
+  return await departmentApi.get(config);
 };
 
 export { getAllDepartments };
